@@ -25,7 +25,7 @@ from conv_tasnet import TasNet
 from torch.nn import MSELoss
 
 
-n_spks = 3
+n_spks = 1
 
 def load_obj(obj, device):
     """

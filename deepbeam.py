@@ -22,7 +22,7 @@ cache_path = '../cache'
 fs = 48000
 V = 343
 
-
+USE_24K=True
 
 # locata=LocataDataset('../remote/eval/', 'benchmark2', 48000, dev=True)
 
@@ -288,6 +288,19 @@ import numpy as np
 import pyroomacoustics as pra
 import os
 
+from scipy.signal import resample
+
+def batchHalveSR(signals):
+    if len(signals.shape)==1:
+        return resample(signals, signals.shape[0]//2)
+    elif len(signals.shape)==2:
+        n=signals.shape[0]
+        result=np.zeros((n, signals.shape[1]//2))
+        for i in range(n):
+            result[i]=resample(signals[i], signals.shape[1]//2)
+        return result
+    else:
+        result=np.stack([batchHalveSR(signals[i]) for i in range(signals.shape[0])], axis=0)
 
 class OnlineSimulationDataset(Dataset):
     def __init__(self, voice_collection, noise_collection, length, simulation_config, truncator, cache_folder,
@@ -402,6 +415,12 @@ class OnlineSimulationDataset(Dataset):
             premix_w_reverb = np.pad(premix_w_reverb, ((0, 0), (0, 0), (0, offset)), "constant")
         else:
             premix_w_reverb = premix_w_reverb[..., :18000]
+        
+        if USE_24K:
+            total=batchHalveSR(total)
+            premix_w_reverb=batchHalveSR(premix_w_reverb)
+            premix=batchHalveSR(premix)
+            background=batchHalveSR(background)
 
         return total, premix_w_reverb, source_angles, premix, background, R, R_loc
 

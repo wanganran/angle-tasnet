@@ -8,7 +8,7 @@ from utility import models, sdr
 
 # Conv-TasNet
 class TasNet(nn.Module):
-    def __init__(self, enc_dim=97, feature_dim=128, sr=48000, win=2.5, layer=8, stack=3,
+    def __init__(self, enc_dim=33, feature_dim=128, sr=24000, win=64, layer=8, stack=3,
                  kernel=3, num_spk=1, causal=True):
         super(TasNet, self).__init__()
         
@@ -18,7 +18,7 @@ class TasNet(nn.Module):
         self.enc_dim = enc_dim
         self.feature_dim = feature_dim
         
-        self.win = int(sr*win/1000)
+        self.win = win
         self.stride = self.win // 2
         
         self.layer = layer
